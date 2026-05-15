@@ -84,36 +84,50 @@ df, salary_col = load_data()
 # =========================================================
 
 # Session state setup
+# =========================================================
+# LOGIN + SIGNUP SYSTEM (FIXED FOR STREAMLIT CLOUD)
+# =========================================================
+
+import json
+import os
+
+USERS_FILE = "users.json"
+
+# Create users file if not exists
+if not os.path.exists(USERS_FILE):
+    with open(USERS_FILE, "w") as f:
+        json.dump({}, f)
+
+# Load users
+with open(USERS_FILE, "r") as f:
+    users = json.load(f)
+
+# Session states
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-if "users" not in st.session_state:
-    st.session_state.users = {
-        "admin": "admin123"
-    }
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+# =========================================================
+# LOGIN PAGE
+# =========================================================
 
 if not st.session_state.logged_in:
 
     st.markdown("""
     <style>
-    .login-container {
-        background-color: #111827;
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0px 0px 15px rgba(255,255,255,0.1);
-    }
-
     .title {
-        text-align: center;
-        font-size: 42px;
-        font-weight: bold;
-        color: white;
+        text-align:center;
+        font-size:48px;
+        font-weight:bold;
+        color:white;
     }
 
     .subtitle {
-        text-align: center;
-        color: #9CA3AF;
-        margin-bottom: 30px;
+        text-align:center;
+        color:lightgray;
+        margin-bottom:30px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -131,7 +145,7 @@ if not st.session_state.logged_in:
     tab1, tab2 = st.tabs(["🔐 Login", "🆕 Sign Up"])
 
     # =====================================================
-    # LOGIN TAB
+    # LOGIN
     # =====================================================
 
     with tab1:
@@ -151,22 +165,23 @@ if not st.session_state.logged_in:
 
         if st.button("Login"):
 
-            users = st.session_state.users
-
             if (
                 login_user in users and
                 users[login_user] == login_pass
             ):
 
                 st.session_state.logged_in = True
-                st.success("Login Successful ✅")
+                st.session_state.username = login_user
+
+                st.success("✅ Login Successful")
+
                 st.rerun()
 
             else:
-                st.error("Invalid Username or Password")
+                st.error("❌ Invalid Username or Password")
 
     # =====================================================
-    # SIGNUP TAB
+    # SIGN UP
     # =====================================================
 
     with tab2:
@@ -192,24 +207,27 @@ if not st.session_state.logged_in:
 
         if st.button("Create Account"):
 
-            users = st.session_state.users
+            if new_user.strip() == "":
+                st.warning("Please enter username")
 
-            if new_user in users:
+            elif new_pass.strip() == "":
+                st.warning("Please enter password")
+
+            elif new_user in users:
                 st.warning("Username already exists")
 
             elif new_pass != confirm_pass:
                 st.warning("Passwords do not match")
 
-            elif len(new_pass) < 4:
-                st.warning("Password must be at least 4 characters")
-
             else:
+
                 users[new_user] = new_pass
 
-                st.success("""
-                Account Created Successfully ✅
-                Please Login.
-                """)
+                with open(USERS_FILE, "w") as f:
+                    json.dump(users, f)
+
+                st.success("✅ Account Created Successfully")
+                st.info("Now login using your new account")
 
     st.stop()
 # =========================================================
