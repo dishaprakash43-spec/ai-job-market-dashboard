@@ -1127,6 +1127,3 @@ if st.sidebar.button("🚪 Logout"):
     st.session_state.username = ""
 
     st.rerun()
-         
-
- 
