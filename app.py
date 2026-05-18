@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import io
 from docx import Document
 import PyPDF2
+import json
+import os
 
 # =========================================================
 # PAGE CONFIG
@@ -15,21 +16,102 @@ st.set_page_config(
 )
 
 # =========================================================
-# DARK THEME
+# PROFESSIONAL REACT STYLE UI
 # =========================================================
 
 st.markdown("""
 <style>
-body {
-    background-color: #0e1117;
-    color: white;
-}
+
+/* Main App */
 .stApp {
-    background-color: #020617;
-}
-h1,h2,h3,h4,h5,h6,p,label {
+    background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
     color: white;
+    font-family: 'Inter', sans-serif;
 }
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Headings */
+h1,h2,h3,h4,h5,h6 {
+    color: white;
+    font-weight: 700;
+}
+
+/* Text */
+p,label {
+    color: #d1d5db;
+}
+
+/* Buttons */
+div.stButton > button {
+    background: linear-gradient(90deg,#2563eb,#06b6d4);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: bold;
+    width: 100%;
+}
+
+div.stButton > button:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 0px 15px rgba(37,99,235,0.4);
+}
+
+/* Metric Cards */
+.metric-card {
+    background: linear-gradient(145deg,#111827,#1e293b);
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0px 6px 20px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.metric-title {
+    color: #94a3b8;
+    font-size: 16px;
+}
+
+.metric-value {
+    color: white;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+/* Upload Box */
+.upload-box {
+    background: linear-gradient(145deg,#111827,#1e293b);
+    padding: 25px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Dataframe */
+[data-testid="stDataFrame"] {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+/* Inputs */
+input, textarea {
+    border-radius: 10px !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2563eb;
+    border-radius: 10px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -39,9 +121,9 @@ h1,h2,h3,h4,h5,h6,p,label {
 
 @st.cache_data
 def load_data():
+
     df = pd.read_csv("job_market_india.csv")
 
-    # Salary cleaning
     salary_col = None
 
     possible_salary_cols = [
@@ -57,6 +139,7 @@ def load_data():
             break
 
     if salary_col:
+
         df[salary_col] = (
             df[salary_col]
             .astype(str)
@@ -79,30 +162,16 @@ df, salary_col = load_data()
 # =========================================================
 # LOGIN SYSTEM
 # =========================================================
-# =========================================================
-# LOGIN + SIGNUP SYSTEM
-# =========================================================
-
-# Session state setup
-# =========================================================
-# LOGIN + SIGNUP SYSTEM (FIXED FOR STREAMLIT CLOUD)
-# =========================================================
-
-import json
-import os
 
 USERS_FILE = "users.json"
 
-# Create users file if not exists
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, "w") as f:
         json.dump({}, f)
 
-# Load users
 with open(USERS_FILE, "r") as f:
     users = json.load(f)
 
-# Session states
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -116,41 +185,40 @@ if "username" not in st.session_state:
 if not st.session_state.logged_in:
 
     st.markdown("""
-    <style>
-    .title {
-        text-align:center;
-        font-size:48px;
-        font-weight:bold;
-        color:white;
-    }
+    <div style="
+    background: linear-gradient(90deg,#2563eb,#06b6d4);
+    padding:30px;
+    border-radius:24px;
+    margin-top:40px;
+    box-shadow:0px 8px 25px rgba(37,99,235,0.25);
+    ">
+    <h1 style="
+    color:white;
+    text-align:center;
+    font-size:60px;
+    font-weight:bold;
+    ">
+    📊 AI Job Market Dashboard
+    </h1>
 
-    .subtitle {
-        text-align:center;
-        color:lightgray;
-        margin-bottom:30px;
-    }
-    </style>
+    <p style="
+    text-align:center;
+    color:white;
+    font-size:20px;
+    ">
+    Real-Time AI Powered Analytics Platform
+    </p>
+    </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(
-        "<div class='title'>🤖 AI Job Market Dashboard</div>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        "<div class='subtitle'>Login or Create a New Account</div>",
-        unsafe_allow_html=True
-    )
+    st.write("")
 
     tab1, tab2 = st.tabs(["🔐 Login", "🆕 Sign Up"])
 
-    # =====================================================
     # LOGIN
-    # =====================================================
-
     with tab1:
 
-        st.subheader("Login to Your Account")
+        st.subheader("Login")
 
         login_user = st.text_input(
             "Username",
@@ -173,20 +241,17 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.session_state.username = login_user
 
-                st.success("✅ Login Successful")
+                st.success("Login Successful")
 
                 st.rerun()
 
             else:
-                st.error("❌ Invalid Username or Password")
+                st.error("Invalid Username or Password")
 
-    # =====================================================
-    # SIGN UP
-    # =====================================================
-
+    # SIGNUP
     with tab2:
 
-        st.subheader("Create New Account")
+        st.subheader("Create Account")
 
         new_user = st.text_input(
             "Create Username",
@@ -207,13 +272,7 @@ if not st.session_state.logged_in:
 
         if st.button("Create Account"):
 
-            if new_user.strip() == "":
-                st.warning("Please enter username")
-
-            elif new_pass.strip() == "":
-                st.warning("Please enter password")
-
-            elif new_user in users:
+            if new_user in users:
                 st.warning("Username already exists")
 
             elif new_pass != confirm_pass:
@@ -226,17 +285,21 @@ if not st.session_state.logged_in:
                 with open(USERS_FILE, "w") as f:
                     json.dump(users, f)
 
-                st.success("✅ Account Created Successfully")
-                st.info("Now login using your new account")
+                st.success("Account Created Successfully")
 
     st.stop()
+
 # =========================================================
 # SIDEBAR
 # =========================================================
 
 st.sidebar.image(
     "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
-    width=150
+    width=120
+)
+
+st.sidebar.success(
+    f"Welcome {st.session_state.username}"
 )
 
 st.sidebar.title("📌 Navigation")
@@ -259,55 +322,15 @@ page = st.sidebar.radio(
 # FILTERS
 # =========================================================
 
-states = []
+state_col = "State"
+role_col = "Job Title"
 
-possible_state_cols = [
-    "State",
-    "state",
-    "Location"
-]
-
-state_col = None
-
-for col in possible_state_cols:
-    if col in df.columns:
-        state_col = col
-        break
-
-if state_col:
-    states = sorted(df[state_col].dropna().unique())
+states = sorted(df[state_col].dropna().unique())
 
 selected_states = st.sidebar.multiselect(
     "📍 Select States",
     states
 )
-
-# Salary range starts from 0
-salary_min = 0
-
-salary_max = int(df[salary_col].max()) if salary_col else 100000
-
-salary_range = st.sidebar.slider(
-    "💰 Salary Range",
-    salary_min,
-    salary_max,
-    (salary_min, salary_max)
-)
-
-# Job Role filter
-role_col = None
-
-possible_role_cols = [
-    "Job Title",
-    "Role",
-    "job_title",
-    "Job Role"
-]
-
-for col in possible_role_cols:
-    if col in df.columns:
-        role_col = col
-        break
 
 roles = sorted(df[role_col].dropna().unique())
 
@@ -316,16 +339,15 @@ selected_roles = st.sidebar.multiselect(
     roles
 )
 
-search = st.sidebar.text_input("🔍 Search Job Role")
+salary_min = 0
+salary_max = int(df[salary_col].max())
 
-experience_level = st.sidebar.selectbox(
-    "🧠 Experience Level",
-    ["Fresher", "Mid-Level", "Experienced"]
+salary_range = st.sidebar.slider(
+    "💰 Salary Range",
+    salary_min,
+    salary_max,
+    (salary_min, salary_max)
 )
-
-# =========================================================
-# FILTER DATA
-# =========================================================
 
 # =========================================================
 # FILTER DATA
@@ -333,135 +355,120 @@ experience_level = st.sidebar.selectbox(
 
 filtered_df = df.copy()
 
-# Apply State Filter
 if selected_states:
     filtered_df = filtered_df[
         filtered_df[state_col].isin(selected_states)
     ]
 
-# Apply Role Filter
 if selected_roles:
     filtered_df = filtered_df[
         filtered_df[role_col].isin(selected_roles)
     ]
 
-# Apply Salary Filter
-if salary_col:
-    filtered_df = filtered_df[
-        (filtered_df[salary_col] >= salary_range[0]) &
-        (filtered_df[salary_col] <= salary_range[1])
-    ]
-
-# Apply Search Filter
-if search:
-    filtered_df = filtered_df[
-        filtered_df[role_col]
-        .str.contains(search, case=False, na=False)
-    ]
-
-# =========================================================
-# EMPTY FILTER FIX
-# =========================================================
+filtered_df = filtered_df[
+    (filtered_df[salary_col] >= salary_range[0]) &
+    (filtered_df[salary_col] <= salary_range[1])
+]
 
 if filtered_df.empty:
-
-    st.warning("""
-    No exact match found for selected filters.
-    Showing similar available jobs instead.
-    """)
-
-    # fallback data
     filtered_df = df.head(20)
 
 # =========================================================
-# AUTO SKILL GENERATOR
+# METRIC CARD
+# =========================================================
+
+def metric_card(title, value):
+
+    st.markdown(f"""
+    <div class="metric-card">
+        <div class="metric-title">{title}</div>
+        <div class="metric-value">{value}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# =========================================================
+# SKILLS FUNCTION
 # =========================================================
 
 def get_skills(role):
 
     role = str(role).lower()
 
-    if "data scientist" in role:
-        return ["Python", "Machine Learning", "SQL", "Deep Learning"]
-
-    elif "data analyst" in role:
+    if "data analyst" in role:
         return ["Excel", "SQL", "Power BI", "Statistics"]
+
+    elif "data scientist" in role:
+        return ["Python", "Machine Learning", "Deep Learning"]
 
     elif "frontend" in role:
         return ["HTML", "CSS", "JavaScript", "React"]
 
     elif "backend" in role:
-        return ["Python", "Django", "APIs", "SQL"]
-
-    elif "software engineer" in role:
-        return ["Java", "DSA", "System Design", "Problem Solving"]
-
-    elif "python" in role:
-        return ["Python", "Flask", "Django", "APIs"]
-
-    elif "machine learning" in role:
-        return ["Python", "TensorFlow", "ML Algorithms", "Data Processing"]
-
-    elif "ai engineer" in role:
-        return ["Deep Learning", "TensorFlow", "Python", "Neural Networks"]
+        return ["Python", "Django", "SQL", "APIs"]
 
     elif "cloud" in role:
-        return ["AWS", "Azure", "Linux", "Networking"]
-
-    elif "business analyst" in role:
-        return ["Excel", "Communication", "SQL", "Analytics"]
-
-    elif "advisor" in role:
-        return ["Communication", "Counselling", "Presentation Skills", "Guidance"]
-
-    elif "artist" in role:
-        return ["Creativity", "Animation", "Blender", "Design"]
-
-    elif "teacher" in role:
-        return ["Teaching", "Communication", "Subject Knowledge", "Presentation"]
-
-    elif "manager" in role:
-        return ["Leadership", "Management", "Communication", "Planning"]
-
-    elif "developer" in role:
-        return ["Programming", "Debugging", "APIs", "Problem Solving"]
+        return ["AWS", "Azure", "Linux"]
 
     else:
-        return [
-            "Communication",
-            "Teamwork",
-            "Problem Solving",
-            "Technical Knowledge"
-        ]
+        return ["Communication", "Teamwork", "Technical Skills"]
 
 # =========================================================
-# DASHBOARD PAGE
+# DASHBOARD
 # =========================================================
 
 if page == "Dashboard":
 
-    st.title("📊 Indian Job Market Dashboard")
+    st.markdown("""
+    <div style="
+    background: linear-gradient(90deg,#2563eb,#06b6d4);
+    padding:30px;
+    border-radius:24px;
+    margin-bottom:25px;
+    box-shadow:0px 8px 25px rgba(37,99,235,0.25);
+    ">
+    <h1 style="
+    color:white;
+    text-align:center;
+    font-size:55px;
+    font-weight:bold;
+    ">
+    📊 AI Job Market Dashboard
+    </h1>
+
+    <p style="
+    text-align:center;
+    color:white;
+    font-size:20px;
+    ">
+    Real-Time AI Powered Analytics Platform
+    </p>
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns(4)
 
-    col1.metric("Total Jobs", len(filtered_df))
+    with col1:
+        metric_card("Total Jobs", len(filtered_df))
 
-    avg_salary = int(filtered_df[salary_col].mean()) \
-        if salary_col else 0
+    with col2:
+        metric_card(
+            "Average Salary",
+            f"₹ {int(filtered_df[salary_col].mean())}"
+        )
 
-    col2.metric("Average Salary", f"₹ {avg_salary}")
+    with col3:
+        metric_card(
+            "States",
+            filtered_df[state_col].nunique()
+        )
 
-    col3.metric(
-        "States",
-        filtered_df[state_col].nunique()
-    )
+    with col4:
+        metric_card(
+            "Top Role",
+            filtered_df[role_col].mode()[0]
+        )
 
-    top_role = filtered_df[role_col].mode()[0] \
-        if len(filtered_df) > 0 else "N/A"
-
-    col4.metric("Top Role", top_role)
-
-    st.subheader("📌 Top Job Roles")
+    st.write("")
 
     role_counts = (
         filtered_df[role_col]
@@ -480,23 +487,13 @@ if page == "Dashboard":
         color="Count"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.subheader("🏆 Top Hiring States")
-
-    state_counts = (
-        filtered_df[state_col]
-        .value_counts()
-        .reset_index()
+    fig.update_layout(
+        paper_bgcolor="#0f172a",
+        plot_bgcolor="#0f172a",
+        font_color="white"
     )
 
-    state_counts.columns = ["State", "Jobs"]
-
-    st.dataframe(state_counts)
-
-# =========================================================
-# SALARY ANALYSIS
-# =========================================================
+    st.plotly_chart(fig, use_container_width=True)
 
 # =========================================================
 # SALARY ANALYSIS
@@ -506,67 +503,49 @@ elif page == "Salary Analysis":
 
     st.title("💰 Salary Analysis")
 
-    # Handle empty filtered data
-    if filtered_df.empty:
+    col1, col2, col3 = st.columns(3)
 
-        st.warning("No data available for selected filters.")
-
-    else:
-
-        max_salary = filtered_df[salary_col].max()
-        min_salary = filtered_df[salary_col].min()
-        avg_salary = filtered_df[salary_col].mean()
-        median_salary = filtered_df[salary_col].median()
-
-        # Replace NaN values safely
-        max_salary = 0 if pd.isna(max_salary) else int(max_salary)
-        min_salary = 0 if pd.isna(min_salary) else int(min_salary)
-        avg_salary = 0 if pd.isna(avg_salary) else int(avg_salary)
-        median_salary = 0 if pd.isna(median_salary) else int(median_salary)
-
-        col1, col2, col3, col4 = st.columns(4)
-
-        col1.metric(
+    with col1:
+        metric_card(
             "Highest Salary",
-            f"₹ {max_salary}"
+            f"₹ {int(filtered_df[salary_col].max())}"
         )
 
-        col2.metric(
-            "Lowest Salary",
-            f"₹ {min_salary}"
-        )
-
-        col3.metric(
+    with col2:
+        metric_card(
             "Average Salary",
-            f"₹ {avg_salary}"
+            f"₹ {int(filtered_df[salary_col].mean())}"
         )
 
-        col4.metric(
-            "Median Salary",
-            f"₹ {median_salary}"
+    with col3:
+        metric_card(
+            "Lowest Salary",
+            f"₹ {int(filtered_df[salary_col].min())}"
         )
 
-        st.subheader("🏆 Highest Paying Jobs")
+    salary_data = (
+        filtered_df
+        .groupby(role_col)[salary_col]
+        .mean()
+        .reset_index()
+        .sort_values(by=salary_col, ascending=False)
+        .head(10)
+    )
 
-        top_jobs = (
-            filtered_df
-            .sort_values(by=salary_col, ascending=False)
-            .head(10)
-        )
+    fig = px.pie(
+        salary_data,
+        names=role_col,
+        values=salary_col,
+        hole=0.5
+    )
 
-        st.dataframe(
-            top_jobs[[role_col, state_col, salary_col]]
-        )
+    fig.update_layout(
+        paper_bgcolor="#0f172a",
+        plot_bgcolor="#0f172a",
+        font_color="white"
+    )
 
-        # Download CSV
-        csv = filtered_df.to_csv(index=False).encode("utf-8")
-
-        st.download_button(
-            "⬇ Download CSV",
-            csv,
-            "filtered_jobs.csv",
-            "text/csv"
-        )
+    st.plotly_chart(fig, use_container_width=True)
 
 # =========================================================
 # STATE ANALYSIS
@@ -591,6 +570,12 @@ elif page == "State Analysis":
         color="Jobs"
     )
 
+    fig.update_layout(
+        paper_bgcolor="#0f172a",
+        plot_bgcolor="#0f172a",
+        font_color="white"
+    )
+
     st.plotly_chart(fig, use_container_width=True)
 
 # =========================================================
@@ -599,7 +584,15 @@ elif page == "State Analysis":
 
 elif page == "Resume Match":
 
-    st.title("📄 Resume Match Score")
+    st.markdown("""
+    <div class="upload-box">
+    <h1 style="color:white;">
+    📄 AI Resume Analyzer
+    </h1>
+
+    Upload Resume • Detect Skills • Get AI Insights
+    </div>
+    """, unsafe_allow_html=True)
 
     uploaded_file = st.file_uploader(
         "Upload Resume",
@@ -610,15 +603,17 @@ elif page == "Resume Match":
 
         text = ""
 
-        # PDF
         if uploaded_file.name.endswith(".pdf"):
 
             pdf_reader = PyPDF2.PdfReader(uploaded_file)
 
             for page in pdf_reader.pages:
-                text += page.extract_text()
 
-        # DOCX
+                extracted = page.extract_text()
+
+                if extracted:
+                    text += extracted
+
         elif uploaded_file.name.endswith(".docx"):
 
             doc = Document(uploaded_file)
@@ -628,71 +623,77 @@ elif page == "Resume Match":
 
         text = text.lower()
 
-        resume_keywords = [
-            "education",
-            "skills",
-            "experience",
-            "project",
-            "resume"
+        all_skills = [
+            "python",
+            "sql",
+            "excel",
+            "machine learning",
+            "react",
+            "aws",
+            "java",
+            "html",
+            "css"
         ]
 
-        is_resume = any(
-            keyword in text
-            for keyword in resume_keywords
-        )
+        found_skills = []
 
-        if not is_resume:
+        for skill in all_skills:
 
-            st.error("❌ This is not a valid resume.")
+            if skill in text:
+                found_skills.append(skill.title())
 
-        else:
+        recommended_role = "Software Engineer"
 
-            st.success("✅ Resume Uploaded Successfully")
+        if "python" in text and "sql" in text:
+            recommended_role = "Data Analyst"
 
-            all_skills = [
-                "python",
-                "sql",
-                "excel",
-                "machine learning",
-                "deep learning",
-                "react",
-                "aws",
-                "java",
-                "communication",
-                "power bi",
-                "django",
-                "tensorflow"
-            ]
+        if "machine learning" in text:
+            recommended_role = "Data Scientist"
 
-            found_skills = []
+        if "react" in text:
+            recommended_role = "Frontend Developer"
 
-            for skill in all_skills:
-                if skill in text:
-                    found_skills.append(skill.title())
+        match_score = min(len(found_skills) * 12, 100)
 
-            st.subheader("🛠 Skills Found in Resume")
+        col1, col2 = st.columns(2)
 
-            if found_skills:
-                st.write(", ".join(found_skills))
-            else:
-                st.warning("No known skills detected.")
+        with col1:
+            metric_card(
+                "Recommended Role",
+                recommended_role
+            )
 
-            # Match role
-            best_role = "Data Analyst"
-            match_score = min(len(found_skills) * 15, 100)
+        with col2:
+            metric_card(
+                "Match Score",
+                f"{match_score}%"
+            )
 
-            if "machine learning" in text:
-                best_role = "Data Scientist"
+        st.subheader("🛠 Skills Detected")
 
-            elif "react" in text:
-                best_role = "Frontend Developer"
+        if found_skills:
 
-            elif "aws" in text:
-                best_role = "Cloud Engineer"
+            skills_html = ""
 
-            st.success(f"Best Matching Role: {best_role}")
+            for skill in found_skills:
 
-            st.metric("Match Score", f"{match_score}%")
+                skills_html += f"""
+                <span style="
+                    background-color:#2563eb;
+                    padding:8px 15px;
+                    border-radius:20px;
+                    margin:5px;
+                    display:inline-block;
+                    color:white;
+                ">
+                    {skill}
+                </span>
+                """
+
+            st.markdown(
+                skills_html,
+                unsafe_allow_html=True
+            )
 
 # =========================================================
 # SKILL GAP ANALYSIS
@@ -707,16 +708,15 @@ elif page == "Skill Gap Analysis":
         roles
     )
 
-    role_skills = get_skills(target_role)
+    skills = get_skills(target_role)
 
-    st.subheader("Required Skills")
-
-    for skill in role_skills:
-        st.write(f"✅ {skill}")
+    for skill in skills:
+        st.success(skill)
 
 # =========================================================
 # AI CAREER ADVISOR
 # =========================================================
+
 # =========================================================
 # AI CAREER ADVISOR
 # =========================================================
@@ -725,63 +725,173 @@ elif page == "AI Career Advisor":
 
     st.title("🤖 AI Career Advisor")
 
-    user_skills = st.text_input(
-        "Enter Your Skills (comma separated)"
+    st.markdown("""
+    <div class="card">
+        <h3>Enter Your Skills</h3>
+        <p>
+        Get AI-powered career recommendations based on your skills
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    user_skills = st.text_area(
+        "Enter Skills (comma separated)",
+        placeholder="Example: Python, SQL, Machine Learning, React"
     )
 
-    if user_skills:
+    # =====================================================
+    # JOB ROLE DATABASE
+    # =====================================================
 
-        skills = [
+    job_roles = {
+
+        "Data Scientist": [
+            "python",
+            "machine learning",
+            "data science",
+            "tensorflow",
+            "deep learning",
+            "pandas",
+            "numpy",
+            "sql"
+        ],
+
+        "Frontend Developer": [
+            "react",
+            "javascript",
+            "html",
+            "css",
+            "typescript"
+        ],
+
+        "Backend Developer": [
+            "python",
+            "django",
+            "flask",
+            "node.js",
+            "api",
+            "sql"
+        ],
+
+        "Cloud Engineer": [
+            "aws",
+            "docker",
+            "kubernetes",
+            "devops",
+            "linux"
+        ],
+
+        "Cyber Security Analyst": [
+            "cyber security",
+            "networking",
+            "linux"
+        ],
+
+        "Data Analyst": [
+            "sql",
+            "excel",
+            "power bi",
+            "tableau",
+            "statistics"
+        ],
+
+        "AI Engineer": [
+            "artificial intelligence",
+            "nlp",
+            "deep learning",
+            "llm",
+            "computer vision"
+        ],
+
+        "Mobile App Developer": [
+            "flutter",
+            "android",
+            "java"
+        ]
+    }
+
+    # =====================================================
+    # BUTTON
+    # =====================================================
+
+    if st.button("🚀 Get Career Recommendations"):
+
+        entered_skills = [
             skill.strip().lower()
             for skill in user_skills.split(",")
         ]
 
-        # Recommendations
-        recommendations = []
+        recommended_roles = []
 
-        if "python" in skills and "sql" in skills:
-            recommendations.append("📊 Data Analyst")
+        # =================================================
+        # MATCH SKILLS
+        # =================================================
 
-        if "machine learning" in skills or "deep learning" in skills:
-            recommendations.append("🤖 Data Scientist")
+        for role, role_skills in job_roles.items():
 
-        if "react" in skills or "javascript" in skills:
-            recommendations.append("💻 Frontend Developer")
+            match_count = 0
 
-        if "django" in skills or "flask" in skills:
-            recommendations.append("⚙ Backend Developer")
+            for skill in entered_skills:
 
-        if "aws" in skills or "cloud" in skills:
-            recommendations.append("☁ Cloud Engineer")
+                if skill in role_skills:
+                    match_count += 1
 
-        if "excel" in skills and "communication" in skills:
-            recommendations.append("📈 Business Analyst")
+            if match_count > 0:
 
-        if not recommendations:
-            recommendations.append("🧠 Software Engineer")
+                recommended_roles.append(
+                    (role, match_count)
+                )
 
-        st.subheader("🎯 Recommended Career Paths")
+        # =================================================
+        # SORT ROLES
+        # =================================================
 
-        for rec in recommendations:
-            st.success(rec)
+        recommended_roles = sorted(
+            recommended_roles,
+            key=lambda x: x[1],
+            reverse=True
+        )
 
-        # Career advice
-        st.subheader("📌 AI Suggestions")
+        # =================================================
+        # DISPLAY RESULTS
+        # =================================================
 
-        if "python" in skills:
-            st.info("Improve Python projects to strengthen your profile.")
+        if recommended_roles:
 
-        if "machine learning" in skills:
-            st.info("Build AI/ML projects and learn deployment.")
+            st.subheader("🎯 Recommended Career Roles")
 
-        if "react" in skills:
-            st.info("Create frontend portfolio projects.")
+            for role, score in recommended_roles:
 
-        if "aws" in skills:
-            st.info("Learn DevOps and cloud deployment.")
+                st.markdown(f"""
+                <div style="
+                background:linear-gradient(145deg,#111827,#1e293b);
+                padding:20px;
+                border-radius:18px;
+                margin-bottom:15px;
+                border:1px solid rgba(255,255,255,0.05);
+                box-shadow:0 0 15px rgba(0,255,255,0.1);
+                ">
 
-        if "communication" not in skills:
-            st.warning("Improve communication skills for better placements.")
+                <h2 style="color:white;">
+                    {role}
+                </h2>
+
+                <p style="color:#94a3b8;">
+                    Skill Match Score: {score}
+                </p>
+
+                </div>
+                """, unsafe_allow_html=True)
+
+        else:
+
+            st.warning(
+                "No matching career roles found. Try adding more skills."
+            )
+
+# =========================================================
+# ROLE COMPARISON
+# =========================================================
 
 # =========================================================
 # ROLE COMPARISON
@@ -789,18 +899,24 @@ elif page == "AI Career Advisor":
 
 elif page == "Role Comparison":
 
-    st.title("⚔ Role Comparison")
+    st.title("⚔ Professional Role Comparison Dashboard")
 
     role1 = st.selectbox(
         "Select Role 1",
-        roles
+        roles,
+        key="role1"
     )
 
     role2 = st.selectbox(
         "Select Role 2",
         roles,
-        index=1 if len(roles) > 1 else 0
+        index=1,
+        key="role2"
     )
+
+    # =====================================================
+    # FIX MISSING SALARIES
+    # =====================================================
 
     role1_salary = filtered_df[
         filtered_df[role_col] == role1
@@ -809,6 +925,61 @@ elif page == "Role Comparison":
     role2_salary = filtered_df[
         filtered_df[role_col] == role2
     ][salary_col].mean()
+
+    # Default salary if missing
+
+    if pd.isna(role1_salary) or role1_salary <= 0:
+        role1_salary = 25000
+
+    if pd.isna(role2_salary) or role2_salary <= 0:
+        role2_salary = 30000
+
+    role1_salary = int(role1_salary)
+    role2_salary = int(role2_salary)
+
+    # =====================================================
+    # METRIC CARDS
+    # =====================================================
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.markdown(f"""
+        <div style="
+        background:linear-gradient(145deg,#111827,#1e293b);
+        padding:25px;
+        border-radius:20px;
+        text-align:center;
+        box-shadow:0 0 20px rgba(0,255,255,0.15);
+        ">
+            <h3 style="color:white;">{role1}</h3>
+            <h1 style="color:#00d4ff;">₹ {role1_salary}</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+
+        st.markdown(f"""
+        <div style="
+        background:linear-gradient(145deg,#111827,#1e293b);
+        padding:25px;
+        border-radius:20px;
+        text-align:center;
+        box-shadow:0 0 20px rgba(0,255,255,0.15);
+        ">
+            <h3 style="color:white;">{role2}</h3>
+            <h1 style="color:#00d4ff;">₹ {role2_salary}</h1>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.write("")
+
+    # =====================================================
+    # ROLE 1 vs ROLE 2 GRAPH
+    # =====================================================
+
+    st.subheader("📊 Role Salary Comparison")
 
     compare_df = pd.DataFrame({
         "Role": [role1, role2],
@@ -822,12 +993,39 @@ elif page == "Role Comparison":
         compare_df,
         x="Role",
         y="Average Salary",
-        color="Role"
+        color="Role",
+        text="Average Salary",
+        template="plotly_dark"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    fig.update_traces(
+        texttemplate='₹%{text:.0f}',
+        textposition='outside'
+    )
 
-    # Skills comparison
+    fig.update_layout(
+        paper_bgcolor="#0f172a",
+        plot_bgcolor="#0f172a",
+        font_color="white",
+        title="Role 1 vs Role 2 Salary Comparison",
+        title_font_size=26,
+        height=550,
+        xaxis_title="Job Roles",
+        yaxis_title="Average Salary",
+        showlegend=True
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
+
+    # =====================================================
+    # SKILLS COMPARISON
+    # =====================================================
+
+    st.write("")
+
     st.subheader("🛠 Skills Comparison")
 
     skills1 = get_skills(role1)
@@ -835,67 +1033,100 @@ elif page == "Role Comparison":
 
     col1, col2 = st.columns(2)
 
+    # ROLE 1 SKILLS
+
     with col1:
-        st.markdown(f"### 🔹 {role1}")
+
+        st.markdown(f"""
+        <div style="
+        background:linear-gradient(145deg,#111827,#1e293b);
+        padding:20px;
+        border-radius:18px;
+        border:1px solid rgba(255,255,255,0.05);
+        margin-bottom:15px;
+        ">
+        <h3 style="color:white;">{role1}</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
         for skill in skills1:
-            st.write(f"✅ {skill}")
+            st.success(skill)
+
+    # ROLE 2 SKILLS
 
     with col2:
-        st.markdown(f"### 🔹 {role2}")
+
+        st.markdown(f"""
+        <div style="
+        background:linear-gradient(145deg,#111827,#1e293b);
+        padding:20px;
+        border-radius:18px;
+        border:1px solid rgba(255,255,255,0.05);
+        margin-bottom:15px;
+        ">
+        <h3 style="color:white;">{role2}</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
         for skill in skills2:
-            st.write(f"✅ {skill}")
-
-# =========================================================
-# ABOUT
-# =========================================================
-
+            st.success(skill)
 # =========================================================
 # ABOUT
 # =========================================================
 
 elif page == "About":
 
-    st.title("ℹ About This Project")
+    st.title("ℹ About Project")
 
     st.markdown("""
-    ## 🇮🇳 AI Powered Indian Job Market Dashboard
-
     ### 🚀 Key Features
 
     ✅ Salary Analysis  
-    ✅ Resume Match Score  
-    ✅ Resume Skill Extraction  
+    ✅ Resume Analyzer  
     ✅ AI Career Advisor  
     ✅ Skill Gap Analysis  
     ✅ Role Comparison  
-    ✅ State-wise Job Analysis  
-    ✅ CSV Download Feature  
-    ✅ Login & Logout System  
-    ✅ Interactive Filters  
 
     ---
 
     ### 🛠 Technologies Used
 
-    - Python  
-    - Streamlit  
-    - Pandas  
-    - Plotly  
-    - PyPDF2  
-    - python-docx  
+    - Python
+    - Streamlit
+    - Pandas
+    - Plotly
+    - PyPDF2
+    - python-docx
 
     ---
 
     ### 👩‍💻 Project Developed By
 
-    **Disha Prakash**
+    Harshitha R
     """)
+
+# =========================================================
+# FOOTER
+# =========================================================
+
+st.markdown("---")
+
+st.markdown("""
+<div style='text-align:center;color:#94a3b8;'>
+Developed with ❤️ using Streamlit | AI Job Market Dashboard
+</div>
+""", unsafe_allow_html=True)
+
 # =========================================================
 # LOGOUT
 # =========================================================
 
-if st.sidebar.button("Logout"):
+if st.sidebar.button("🚪 Logout"):
+
     st.session_state.logged_in = False
+    st.session_state.username = ""
+
     st.rerun()
+         
+
+ 
